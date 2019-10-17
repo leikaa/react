@@ -1,12 +1,12 @@
 import React from 'react';
 import { Add } from './components/Add';
 import { News } from './components/News';
-import newsData from './data/newsData.json';
 import './App.css';
 
 class App extends React.Component {
   state = {
-    news: newsData
+    news: null,
+    isLoading: false
   };
 
   handleAddNews = (data) => {
@@ -14,12 +14,29 @@ class App extends React.Component {
     this.setState({ news: nextNews })
   };
 
+  componentDidMount() {
+    this.setState({ isLoading: true });
+
+    fetch('http://localhost:3000/data/newsData.json')
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          setTimeout(() => {
+            this.setState({ isLoading: false, news: data });
+          }, 3000);
+        })
+  }
+
   render() {
+    const { news, isLoading } = this.state;
+
     return (
         <React.Fragment>
           <Add onAddNews={this.handleAddNews} />
           <h3>Новости</h3>
-          <News data={this.state.news} />
+          {isLoading && <p>Загружаю...</p>}
+          {Array.isArray(news) && <News data={news} />}
         </React.Fragment>
     )
   }
